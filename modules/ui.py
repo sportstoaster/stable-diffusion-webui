@@ -704,7 +704,7 @@ def create_ui(wrap_gradio_gpu_call):
             with gr.Column():
                 with gr.Group() as tr_inp:
                     obj_type = gr.Textbox(label = 'Product Type(Pillow, Chair, Desk etc.)')
-                    fls = gr.Files(file_count="multiple")
+                    # fls = gr.Files(file_count="multiple")
                 trn = gr.Button("Train")
 
         with gr.Row(elem_id='txt2img_progress_row'):
