@@ -40,6 +40,7 @@ from modules.sd_samplers import samplers, samplers_for_img2img
 import modules.textual_inversion.ui
 import modules.hypernetworks.ui
 from modules.generation_parameters_copypaste import image_from_url_text
+import modules.picjam
 
 # this is a fix for Windows users. Without it, javascript files will be served with text/html content-type and the browser will not show any UI
 mimetypes.init()
@@ -683,8 +684,483 @@ Requested path was: {f}
                 parameters_copypaste.bind_buttons(buttons, result_gallery, "txt2img" if tabname == "txt2img" else None)
                 return result_gallery, generation_info if tabname != "extras" else html_info_x, html_info
 
-
 def create_ui(wrap_gradio_gpu_call):
+    import modules.img2img
+    import modules.txt2img
+
+    reload_javascript()
+
+    parameters_copypaste.reset()
+
+    modules.scripts.scripts_current = modules.scripts.scripts_txt2img
+    modules.scripts.scripts_txt2img.initialize_scripts(is_img2img=False)
+
+    with gr.Blocks(analytics_enabled=False) as txt2img_interface:
+        txt2img_prompt, roll, txt2img_prompt_style, txt2img_negative_prompt, txt2img_prompt_style2, submit, _, _, txt2img_prompt_style_apply, txt2img_save_style, txt2img_paste, token_counter, token_button = create_toprow(is_img2img=False)
+        dummy_component = gr.Label(visible=False)
+        txt_prompt_img = gr.File(label="", elem_id="txt2img_prompt_image", file_count="single", type="bytes", visible=False)
+        gr.Markdown("PicJam")
+        with gr.Row():
+            with gr.Column():
+                with gr.Group() as tr_inp:
+                    obj_type = gr.Textbox(label = 'Product Type(Pillow, Chair, Desk etc.)')
+                    fls = gr.Files(file_count="multiple")
+                trn = gr.Button("Train")
+
+        with gr.Row(elem_id='txt2img_progress_row'):
+            with gr.Column(scale=1):
+                pass
+
+            with gr.Column(scale=1):
+                progressbar = gr.HTML(elem_id="txt2img_progressbar")
+                txt2img_preview = gr.Image(elem_id='txt2img_preview', visible=False)
+                setup_progressbar(progressbar, txt2img_preview, 'txt2img')
+
+        with gr.Row().style(equal_height=False):
+            with gr.Column(variant='panel', visible='hidden'):
+                steps = gr.Slider(minimum=1, maximum=150, step=1, label="Sampling Steps", value=20)
+                sampler_index = gr.Radio(label='Sampling method', elem_id="txt2img_sampling", choices=[x.name for x in samplers], value=samplers[0].name, type="index")
+
+                with gr.Group():
+                    width = gr.Slider(minimum=64, maximum=2048, step=64, label="Width", value=512)
+                    height = gr.Slider(minimum=64, maximum=2048, step=64, label="Height", value=512)
+
+                with gr.Row():
+                    restore_faces = gr.Checkbox(label='Restore faces', value=False, visible=len(shared.face_restorers) > 1)
+                    tiling = gr.Checkbox(label='Tiling', value=False)
+                    enable_hr = gr.Checkbox(label='Highres. fix', value=False)
+
+                with gr.Row(visible=False) as hr_options:
+                    firstphase_width = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass width", value=0)
+                    firstphase_height = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass height", value=0)
+                    denoising_strength = gr.Slider(minimum=0.0, maximum=1.0, step=0.01, label='Denoising strength', value=0.7)
+
+                with gr.Row(equal_height=True):
+                    batch_count = gr.Slider(minimum=1, step=1, label='Batch count', value=1)
+                    batch_size = gr.Slider(minimum=1, maximum=8, step=1, label='Batch size', value=1)
+
+                cfg_scale = gr.Slider(minimum=1.0, maximum=30.0, step=0.5, label='CFG Scale', value=7.0)
+
+                seed, reuse_seed, subseed, reuse_subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox = create_seed_inputs()
+
+                with gr.Group():
+                    custom_inputs = modules.scripts.scripts_txt2img.setup_ui()
+
+            txt2img_gallery, generation_info, html_info = create_output_panel("txt2img", opts.outdir_txt2img_samples)
+            parameters_copypaste.bind_buttons({"txt2img": txt2img_paste}, None, txt2img_prompt)
+
+            connect_reuse_seed(seed, reuse_seed, generation_info, dummy_component, is_subseed=False)
+            connect_reuse_seed(subseed, reuse_subseed, generation_info, dummy_component, is_subseed=True)
+
+            txt2img_args = dict(
+                fn=wrap_gradio_gpu_call(modules.txt2img.txt2img),
+                _js="submit",
+                inputs=[
+                    txt2img_prompt,
+                    txt2img_negative_prompt,
+                    txt2img_prompt_style,
+                    txt2img_prompt_style2,
+                    steps,
+                    sampler_index,
+                    restore_faces,
+                    tiling,
+                    batch_count,
+                    batch_size,
+                    cfg_scale,
+                    seed,
+                    subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox,
+                    height,
+                    width,
+                    enable_hr,
+                    denoising_strength,
+                    firstphase_width,
+                    firstphase_height,
+                ] + custom_inputs,
+
+                outputs=[
+                    txt2img_gallery,
+                    generation_info,
+                    html_info
+                ],
+                show_progress=False,
+            )
+
+            txt2img_prompt.submit(**txt2img_args)
+            submit.click(**txt2img_args)
+
+            txt_prompt_img.change(
+                fn=modules.images.image_data,
+                inputs=[
+                    txt_prompt_img
+                ],
+                outputs=[
+                    txt2img_prompt,
+                    txt_prompt_img
+                ]
+            )
+
+            enable_hr.change(
+                fn=lambda x: gr_show(x),
+                inputs=[enable_hr],
+                outputs=[hr_options],
+            )
+
+            roll.click(
+                fn=roll_artist,
+                _js="update_txt2img_tokens",
+                inputs=[
+                    txt2img_prompt,
+                ],
+                outputs=[
+                    txt2img_prompt,
+                ]
+            )
+
+            txt2img_paste_fields = [
+                (txt2img_prompt, "Prompt"),
+                (txt2img_negative_prompt, "Negative prompt"),
+                (steps, "Steps"),
+                (sampler_index, "Sampler"),
+                (restore_faces, "Face restoration"),
+                (cfg_scale, "CFG scale"),
+                (seed, "Seed"),
+                (width, "Size-1"),
+                (height, "Size-2"),
+                (batch_size, "Batch size"),
+                (subseed, "Variation seed"),
+                (subseed_strength, "Variation seed strength"),
+                (seed_resize_from_w, "Seed resize from-1"),
+                (seed_resize_from_h, "Seed resize from-2"),
+                (denoising_strength, "Denoising strength"),
+                (enable_hr, lambda d: "Denoising strength" in d),
+                (hr_options, lambda d: gr.Row.update(visible="Denoising strength" in d)),
+                (firstphase_width, "First pass size-1"),
+                (firstphase_height, "First pass size-2"),
+                *modules.scripts.scripts_txt2img.infotext_fields
+            ]
+            parameters_copypaste.add_paste_fields("txt2img", None, txt2img_paste_fields)
+
+            txt2img_preview_params = [
+                txt2img_prompt,
+                txt2img_negative_prompt,
+                steps,
+                sampler_index,
+                cfg_scale,
+                seed,
+                width,
+                height,
+            ]
+
+            token_button.click(fn=update_token_counter, inputs=[txt2img_prompt, steps], outputs=[token_counter])
+
+    def create_setting_component(key, is_quicksettings=False):
+        def fun():
+            return opts.data[key] if key in opts.data else opts.data_labels[key].default
+
+        info = opts.data_labels[key]
+        t = type(info.default)
+
+        args = info.component_args() if callable(info.component_args) else info.component_args
+
+        if info.component is not None:
+            comp = info.component
+        elif t == str:
+            comp = gr.Textbox
+        elif t == int:
+            comp = gr.Number
+        elif t == bool:
+            comp = gr.Checkbox
+        else:
+            raise Exception(f'bad options item type: {str(t)} for key {key}')
+
+        elem_id = "setting_"+key
+
+        if info.refresh is not None:
+            if is_quicksettings:
+                res = comp(label=info.label, value=fun(), elem_id=elem_id, **(args or {}))
+                create_refresh_button(res, info.refresh, info.component_args, "refresh_" + key)
+            else:
+                with gr.Row(variant="compact"):
+                    res = comp(label=info.label, value=fun(), elem_id=elem_id, **(args or {}))
+                    create_refresh_button(res, info.refresh, info.component_args, "refresh_" + key)
+        else:
+            res = comp(label=info.label, value=fun(), elem_id=elem_id, **(args or {}))
+
+        return res
+
+    components = []
+    component_dict = {}
+
+    script_callbacks.ui_settings_callback()
+    opts.reorder()
+
+    def run_settings(*args):
+        changed = []
+
+        for key, value, comp in zip(opts.data_labels.keys(), args, components):
+            assert comp == dummy_component or opts.same_type(value, opts.data_labels[key].default), f"Bad value for setting {key}: {value}; expecting {type(opts.data_labels[key].default).__name__}"
+
+        for key, value, comp in zip(opts.data_labels.keys(), args, components):
+            if comp == dummy_component:
+                continue
+
+            if opts.set(key, value):
+                changed.append(key)
+
+        try:
+            opts.save(shared.config_filename)
+        except RuntimeError:
+            return opts.dumpjson(), f'{len(changed)} settings changed without save: {", ".join(changed)}.'
+        return opts.dumpjson(), f'{len(changed)} settings changed: {", ".join(changed)}.'
+
+    def run_settings_single(value, key):
+        if not opts.same_type(value, opts.data_labels[key].default):
+            return gr.update(visible=True), opts.dumpjson()
+
+        if not opts.set(key, value):
+            return gr.update(value=getattr(opts, key)), opts.dumpjson()
+
+        opts.save(shared.config_filename)
+
+        return gr.update(value=value), opts.dumpjson()
+
+    with gr.Blocks(analytics_enabled=False) as settings_interface:
+        settings_submit = gr.Button(value="Apply settings", variant='primary')
+        result = gr.HTML()
+
+        settings_cols = 3
+        items_per_col = int(len(opts.data_labels) * 0.9 / settings_cols)
+
+        quicksettings_names = [x.strip() for x in opts.quicksettings.split(",")]
+        quicksettings_names = set(x for x in quicksettings_names if x != 'quicksettings')
+
+        quicksettings_list = []
+
+        cols_displayed = 0
+        items_displayed = 0
+        previous_section = None
+        column = None
+        with gr.Row(elem_id="settings").style(equal_height=False):
+            for i, (k, item) in enumerate(opts.data_labels.items()):
+                section_must_be_skipped = item.section[0] is None
+
+                if previous_section != item.section and not section_must_be_skipped:
+                    if cols_displayed < settings_cols and (items_displayed >= items_per_col or previous_section is None):
+                        if column is not None:
+                            column.__exit__()
+
+                        column = gr.Column(variant='panel')
+                        column.__enter__()
+
+                        items_displayed = 0
+                        cols_displayed += 1
+
+                    previous_section = item.section
+
+                    elem_id, text = item.section
+                    gr.HTML(elem_id="settings_header_text_{}".format(elem_id), value='<h1 class="gr-button-lg">{}</h1>'.format(text))
+
+                if k in quicksettings_names and not shared.cmd_opts.freeze_settings:
+                    quicksettings_list.append((i, k, item))
+                    components.append(dummy_component)
+                elif section_must_be_skipped:
+                    components.append(dummy_component)
+                else:
+                    component = create_setting_component(k)
+                    component_dict[k] = component
+                    components.append(component)
+                    items_displayed += 1
+
+        with gr.Row():
+            request_notifications = gr.Button(value='Request browser notifications', elem_id="request_notifications")
+            download_localization = gr.Button(value='Download localization template', elem_id="download_localization")
+
+        with gr.Row():
+            reload_script_bodies = gr.Button(value='Reload custom script bodies (No ui updates, No restart)', variant='secondary')
+            restart_gradio = gr.Button(value='Restart Gradio and Refresh components (Custom Scripts, ui.py, js and css only)', variant='primary')
+
+        request_notifications.click(
+            fn=lambda: None,
+            inputs=[],
+            outputs=[],
+            _js='function(){}'
+        )
+
+        download_localization.click(
+            fn=lambda: None,
+            inputs=[],
+            outputs=[],
+            _js='download_localization'
+        )
+
+        def reload_scripts():
+            modules.scripts.reload_script_body_only()
+            reload_javascript()  # need to refresh the html page
+
+        reload_script_bodies.click(
+            fn=reload_scripts,
+            inputs=[],
+            outputs=[]
+        )
+
+        def request_restart():
+            shared.state.interrupt()
+            shared.state.need_restart = True
+
+        restart_gradio.click(
+            fn=request_restart,
+            _js='restart_reload',
+            inputs=[],
+            outputs=[],
+        )
+
+        if column is not None:
+            column.__exit__()
+
+    
+    interfaces = [
+        (txt2img_interface, "txt2img", "txt2img"),
+    ]
+
+    css = ""
+
+    for cssfile in modules.scripts.list_files_with_name("style.css"):
+        if not os.path.isfile(cssfile):
+            continue
+
+        with open(cssfile, "r", encoding="utf8") as file:
+            css += file.read() + "\n"
+
+    if os.path.exists(os.path.join(script_path, "user.css")):
+        with open(os.path.join(script_path, "user.css"), "r", encoding="utf8") as file:
+            css += file.read() + "\n"
+
+    if not cmd_opts.no_progressbar_hiding:
+        css += css_hide_progressbar
+
+#     interfaces += script_callbacks.ui_tabs_callback()
+#     interfaces += [(settings_interface, "Settings", "settings")]
+
+#     extensions_interface = ui_extensions.create_ui()
+#     interfaces += [(extensions_interface, "Extensions", "extensions")]
+
+    with gr.Blocks(css=css, analytics_enabled=False, title="Stable Diffusion") as demo:
+        with gr.Row(elem_id="quicksettings"):
+            for i, k, item in quicksettings_list:
+                component = create_setting_component(k, is_quicksettings=True)
+                component_dict[k] = component
+
+        # parameters_copypaste.integrate_settings_paste_fields(component_dict)
+        # parameters_copypaste.run_bind()
+
+        with gr.Tabs(elem_id="tabs") as tabs:
+            for interface, label, ifid in interfaces:
+                with gr.TabItem(label, id=ifid, elem_id='tab_' + ifid):
+                    interface.render()
+
+        if os.path.exists(os.path.join(script_path, "notification.mp3")):
+            audio_notification = gr.Audio(interactive=False, value=os.path.join(script_path, "notification.mp3"), elem_id="audio_notification", visible=False)
+
+        text_settings = gr.Textbox(elem_id="settings_json", value=lambda: opts.dumpjson(), visible=False)
+        settings_submit.click(
+            fn=wrap_gradio_call(run_settings, extra_outputs=[gr.update()]),
+            inputs=components,
+            outputs=[text_settings, result],
+        )
+
+        for i, k, item in quicksettings_list:
+            component = component_dict[k]
+
+            component.change(
+                fn=lambda value, k=k: run_settings_single(value, key=k),
+                inputs=[component],
+                outputs=[component, text_settings],
+            )
+
+        component_keys = [k for k in opts.data_labels.keys() if k in component_dict]
+
+        def get_settings_values():
+            return [getattr(opts, key) for key in component_keys]
+
+        demo.load(
+            fn=get_settings_values,
+            inputs=[],
+            outputs=[component_dict[k] for k in component_keys],
+        )
+
+        
+
+    ui_config_file = cmd_opts.ui_config_file
+    ui_settings = {}
+    settings_count = len(ui_settings)
+    error_loading = False
+
+    try:
+        if os.path.exists(ui_config_file):
+            with open(ui_config_file, "r", encoding="utf8") as file:
+                ui_settings = json.load(file)
+    except Exception:
+        error_loading = True
+        print("Error loading settings:", file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
+
+    def loadsave(path, x):
+        def apply_field(obj, field, condition=None, init_field=None):
+            key = path + "/" + field
+
+            if getattr(obj, 'custom_script_source', None) is not None:
+              key = 'customscript/' + obj.custom_script_source + '/' + key
+
+            if getattr(obj, 'do_not_save_to_config', False):
+                return
+
+            saved_value = ui_settings.get(key, None)
+            if saved_value is None:
+                ui_settings[key] = getattr(obj, field)
+            elif condition and not condition(saved_value):
+                print(f'Warning: Bad ui setting value: {key}: {saved_value}; Default value "{getattr(obj, field)}" will be used instead.')
+            else:
+                setattr(obj, field, saved_value)
+                if init_field is not None:
+                    init_field(saved_value)
+
+        if type(x) in [gr.Slider, gr.Radio, gr.Checkbox, gr.Textbox, gr.Number] and x.visible:
+            apply_field(x, 'visible')
+
+        if type(x) == gr.Slider:
+            apply_field(x, 'value')
+            apply_field(x, 'minimum')
+            apply_field(x, 'maximum')
+            apply_field(x, 'step')
+
+        if type(x) == gr.Radio:
+            apply_field(x, 'value', lambda val: val in x.choices)
+
+        if type(x) == gr.Checkbox:
+            apply_field(x, 'value')
+
+        if type(x) == gr.Textbox:
+            apply_field(x, 'value')
+
+        if type(x) == gr.Number:
+            apply_field(x, 'value')
+
+        # Since there are many dropdowns that shouldn't be saved,
+        # we only mark dropdowns that should be saved.
+        if type(x) == gr.Dropdown and getattr(x, 'save_to_config', False):
+            apply_field(x, 'value', lambda val: val in x.choices, getattr(x, 'init_field', None))
+            apply_field(x, 'visible')
+
+    visit(txt2img_interface, loadsave, "txt2img")
+
+    if not error_loading and (not os.path.exists(ui_config_file) or settings_count != len(ui_settings)):
+        with open(ui_config_file, "w", encoding="utf8") as file:
+            json.dump(ui_settings, file, indent=4)
+
+    return demo
+
+
+def create_ui_(wrap_gradio_gpu_call):
     import modules.img2img
     import modules.txt2img
 
