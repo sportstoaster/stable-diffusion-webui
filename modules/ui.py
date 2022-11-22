@@ -717,6 +717,17 @@ def create_ui(wrap_gradio_gpu_call):
                 progressbar = gr.HTML(elem_id="txt2img_progressbar")
                 txt2img_preview = gr.Image(elem_id='txt2img_preview', visible=False)
                 setup_progressbar(progressbar, txt2img_preview, 'txt2img')
+        
+        with gr.Row().style(equal_height=False):
+            with gr.Column(variant='panel', visible=False):
+                rad = gr.Radio(["Studio", "Professional Lifestyle", "UGC Lifestyle"], label='Style')
+                # bg = gr.Radio(["White", "Colour"], label='Background')
+                bg = gr.Textbox(label = 'Background Color')
+                env = gr.Radio(["Apartment", "Office", "Cafe", "City Street", "Residential Street", "Stairs", "Beach", "Park", "Pier", "Gym"], label="Environment", visible=False)
+
+                pos = gr.Textbox(label='Positioned on')
+                ang = gr.Radio(["Front", "Side", "Back", "Top", "Detail", "Close-up"], label='Product Angles')
+                num = gr.Slider(minimum=1, maximum=64, step=1, label='Number of images')
 
         with gr.Row().style(equal_height=False):
             with gr.Column(variant='panel', visible=False):
