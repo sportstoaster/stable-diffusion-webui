@@ -3,7 +3,7 @@ import shutil
 import gradio as gr
 import torch
 # from dreambooth import dreambooth_row
-import modules.txt2img
+
 
 def gpu_memory_cleanup():
     torch.cuda.empty_cache()
