@@ -40,7 +40,9 @@ from modules.sd_samplers import samplers, samplers_for_img2img
 import modules.textual_inversion.ui
 import modules.hypernetworks.ui
 from modules.generation_parameters_copypaste import image_from_url_text
-import modules.picjam
+import modules.picjam as picjam
+
+import modules.dreambooth
 
 # this is a fix for Windows users. Without it, javascript files will be served with text/html content-type and the browser will not show any UI
 mimetypes.init()
@@ -697,13 +699,6 @@ def create_ui(wrap_gradio_gpu_call):
 
     with gr.Blocks(analytics_enabled=False) as txt2img_interface:
         gr.Markdown("PicJam")
-        with gr.Row():
-            with gr.Column():
-                with gr.Group() as tr_inp:
-                    obj_type = gr.Textbox(label = 'Product Type(Pillow, Chair, Desk etc.)')
-                    # fls = gr.Files(file_count="multiple")
-                trn = gr.Button("Train")
-
         txt2img_prompt, roll, txt2img_prompt_style, txt2img_negative_prompt, txt2img_prompt_style2, submit, _, _, txt2img_prompt_style_apply, txt2img_save_style, txt2img_paste, token_counter, token_button = create_toprow(is_img2img=False)
         dummy_component = gr.Label(visible=False)
         txt_prompt_img = gr.File(label="", elem_id="txt2img_prompt_image", file_count="single", type="bytes", visible=False)
@@ -718,18 +713,27 @@ def create_ui(wrap_gradio_gpu_call):
                 txt2img_preview = gr.Image(elem_id='txt2img_preview', visible=False)
                 setup_progressbar(progressbar, txt2img_preview, 'txt2img')
         
-
+        with gr.Row():
+            with gr.Column():
+                with gr.Group():
+                    obj_name = gr.Textbox(label = 'Product Name')
+                    obj_type =  gr.Textbox(label = 'Product Type')
+                    # fls = gr.Files(file_count="multiple")
+        
+        db_prompt = picjam.dreambooth_prompt(obj_name, obj_type)
+        
 
         with gr.Row().style(equal_height=False):
             with gr.Column(variant='panel'):
-                rad = gr.Radio(["Studio", "Professional Lifestyle", "UGC Lifestyle"], label='Style')
+                stl = gr.Radio(["Studio", "Professional Lifestyle", "UGC Lifestyle"], label='Style')
                 # bg = gr.Radio(["White", "Colour"], label='Background')
                 bg = gr.Textbox(label = 'Background Color')
                 env = gr.Radio(["Apartment", "Office", "Cafe", "City Street", "Residential Street", "Stairs", "Beach", "Park", "Pier", "Gym"], label="Environment", visible=False)
 
                 pos = gr.Textbox(label='Positioned on')
                 ang = gr.Radio(["Front", "Side", "Back", "Top", "Detail", "Close-up"], label='Product Angles')
-                num = gr.Slider(minimum=1, maximum=64, step=1, label='Number of images')
+                itms = gr.Textbox(label='Items')
+                batch_count = gr.Slider(minimum=1, step=1, label='Number of images', value=1)
 
             with gr.Column(variant='panel', visible=False):
                 steps = gr.Slider(minimum=1, maximum=150, step=1, label="Sampling Steps", value=20)
@@ -750,7 +754,7 @@ def create_ui(wrap_gradio_gpu_call):
                     denoising_strength = gr.Slider(minimum=0.0, maximum=1.0, step=0.01, label='Denoising strength', value=0.7)
 
                 with gr.Row(equal_height=True):
-                    batch_count = gr.Slider(minimum=1, step=1, label='Batch count', value=1)
+                    # batch_count = gr.Slider(minimum=1, step=1, label='Batch count', value=1)
                     batch_size = gr.Slider(minimum=1, maximum=8, step=1, label='Batch size', value=1)
 
                 cfg_scale = gr.Slider(minimum=1.0, maximum=30.0, step=0.5, label='CFG Scale', value=7.0)
@@ -765,6 +769,8 @@ def create_ui(wrap_gradio_gpu_call):
 
             connect_reuse_seed(seed, reuse_seed, generation_info, dummy_component, is_subseed=False)
             connect_reuse_seed(subseed, reuse_subseed, generation_info, dummy_component, is_subseed=True)
+
+            
 
             txt2img_args = dict(
                 fn=wrap_gradio_gpu_call(modules.txt2img.txt2img),
@@ -799,8 +805,27 @@ def create_ui(wrap_gradio_gpu_call):
                 show_progress=False,
             )
 
-            txt2img_prompt.submit(**txt2img_args)
-            submit.click(**txt2img_args)
+            style_args = dict(
+                fn=picjam.prompt_constructor,
+                inputs = [
+                    txt2img_prompt,
+                    stl,
+                    env,
+                    bg,
+                    pos,
+                    ang,
+                    itms
+                ],
+                outputs = [
+                    txt2img_prompt,
+                    txt2img_negative_prompt
+                ]
+            )
+            
+            txt2img_prompt.submit(**style_args)
+            submit.click(**style_args)
+
+            txt2img_prompt.change(**txt2img_args)
 
             txt_prompt_img.change(
                 fn=modules.images.image_data,
