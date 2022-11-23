@@ -718,7 +718,7 @@ def create_ui(wrap_gradio_gpu_call):
                     obj_type =  gr.Textbox(label = 'Product Type')
                     # fls = gr.Files(file_count="multiple")
         
-        db_prompt = picjam.dreambooth_prompt(obj_name, obj_type)
+        # db_prompt = picjam.dreambooth_prompt(obj_name, obj_type)
         
 
         with gr.Row().style(equal_height=False):
@@ -802,11 +802,14 @@ def create_ui(wrap_gradio_gpu_call):
                 ],
                 show_progress=False,
             )
-
+            
+            obj_name.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[txt2img_prompt])
+            obj_type.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[txt2img_prompt])
+            
             style_args = dict(
                 fn=picjam.prompt_constructor,
                 inputs = [
-                    db_prompt,
+                    txt2img_prompt,
                     stl,
                     env,
                     bg,
