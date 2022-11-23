@@ -719,7 +719,7 @@ def create_ui(wrap_gradio_gpu_call):
                 setup_progressbar(progressbar, txt2img_preview, 'txt2img')
         
         with gr.Row().style(equal_height=False):
-            with gr.Column(variant='panel', visible=False):
+            with gr.Column(variant='panel'):
                 rad = gr.Radio(["Studio", "Professional Lifestyle", "UGC Lifestyle"], label='Style')
                 # bg = gr.Radio(["White", "Colour"], label='Background')
                 bg = gr.Textbox(label = 'Background Color')
