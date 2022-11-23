@@ -805,7 +805,7 @@ def create_ui(wrap_gradio_gpu_call):
             
             obj_name.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[txt2img_prompt])
             obj_type.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[txt2img_prompt])
-            
+
             style_args = dict(
                 fn=picjam.prompt_constructor,
                 inputs = [
@@ -823,7 +823,7 @@ def create_ui(wrap_gradio_gpu_call):
                 ]
             )
             
-            txt2img_prompt.submit(**style_args)
+            # txt2img_prompt.submit(**style_args)
             submit.click(**style_args)
 
             txt2img_prompt.change(**txt2img_args)
