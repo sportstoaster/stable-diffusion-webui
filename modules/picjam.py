@@ -2,7 +2,7 @@ import os
 import shutil
 import gradio as gr
 import torch
-from dreambooth import dreambooth_row
+# from dreambooth import dreambooth_row
 import modules.txt2img
 
 def gpu_memory_cleanup():
