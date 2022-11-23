@@ -803,13 +803,14 @@ def create_ui(wrap_gradio_gpu_call):
                 show_progress=False,
             )
             
-            obj_name.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[txt2img_prompt])
-            obj_type.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[txt2img_prompt])
+            db_prompt = gr.Textbox(visible=False)
+            obj_name.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[db_prompt])
+            obj_type.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[db_prompt])
 
             style_args = dict(
                 fn=picjam.prompt_constructor,
                 inputs = [
-                    txt2img_prompt,
+                    db_prompt,
                     stl,
                     env,
                     bg,
