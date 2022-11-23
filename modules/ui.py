@@ -806,7 +806,7 @@ def create_ui(wrap_gradio_gpu_call):
             style_args = dict(
                 fn=picjam.prompt_constructor,
                 inputs = [
-                    txt2img_prompt,
+                    db_prompt,
                     stl,
                     env,
                     bg,
