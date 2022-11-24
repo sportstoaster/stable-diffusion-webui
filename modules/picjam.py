@@ -59,11 +59,15 @@ def predict(prompt, style, angle, back, num):
 def prompt_constructor(prompt, style, angle, background, bg_color, positiion, items):
     negative_prompt = ""
     angle_prompt = ""
+    pos_prompt = ""
+    bg_prompt = ""
+    items_prompt = ""
+    style_prompt = ""
     angle_prompt = angle + angle_prompt
     
     style_prompt = ""
     if style == "Studio":
-        style_prompt=" in clean white studio environment"
+        style_prompt=" in clean studio environment"
         negative_prompt += "street, product photo, unit, office, high-fashion, DSLR"
     elif style=="Professional Lifestyle":
         style_prompt=" street, product photo, unit, office, high-fashion, DSLR"
@@ -72,10 +76,19 @@ def prompt_constructor(prompt, style, angle, background, bg_color, positiion, it
         style_prompt="iphone photo, instagram, review"
         negative_prompt += "in clean white studio environment, DSLR, camera, 85mm, 100mm"
     
-    bg_prompt = f" with {background} in background"
-    
+    if len(background) > 0:
+        bg_prompt = f" with {background} in background"
+    if len(bg_color) > 0:
+        bg_prompt = f" with {bg_color} background"
+    if len(positiion) > 0:
+        pos_prompt = f"on {positiion}"
+    if len(items) > 0:
+        items_prompt = f" with {items}"
+
     prompt += style_prompt + bg_prompt
+    prompt += bg_prompt + pos_prompt + items_prompt
     prompt = angle_prompt + " " + prompt
+
     return prompt, negative_prompt
 
 import string, random
