@@ -2,8 +2,7 @@ import os
 import shutil
 import gradio as gr
 import torch
-# from dreambooth import dreambooth_row
-
+from PIL import Image
 
 def gpu_memory_cleanup():
     torch.cuda.empty_cache()
@@ -20,7 +19,7 @@ def images_upload(images, dirname):
     os.makedirs(dirname)
     
     for i, image in enumerate(images):
-        image.save(os.path.join(dirname, f"image{i}.jpg"))
+        Image.open(image).save(os.path.join(dirname, f"image{i}.jpg"))
 
     return os.path.abspath(dirname)
 
