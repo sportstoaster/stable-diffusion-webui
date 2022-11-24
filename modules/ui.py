@@ -716,8 +716,8 @@ def create_ui(wrap_gradio_gpu_call):
                 with gr.Group():
                     obj_name = gr.Textbox(label = 'Product Name')
                     obj_type =  gr.Textbox(label = 'Product Type')
-                    fls = gr.Files(file_count="multiple")
-                    dirname = gr.textbox(label = 'Files Directory', visible = False)
+        fls = gr.File(file_count="multiple")
+        dirname = gr.textbox(label = 'Files Directory', visible = False)
         fls.change(fn=picjam.dreambooth_train_params, inputs=[fls, obj_name], outputs=[dirname, obj_name])
         # db_prompt = picjam.dreambooth_prompt(obj_name, obj_type)
         
