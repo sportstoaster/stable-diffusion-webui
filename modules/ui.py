@@ -533,8 +533,8 @@ def setup_progressbar(progressbar, preview, id_part, textinfo=None):
         outputs=[progressbar, preview, preview, textinfo],
     )
 
-from extensions.sd_dreambooth_extension.dreambooth import conversion, dreambooth
-from extensions.sd_dreambooth_extension.dreambooth.dreambooth import get_db_models, performance_wizard, training_wizard, training_wizard_person
+# from extensions.sd_dreambooth_extension.dreambooth import conversion, dreambooth
+# from extensions.sd_dreambooth_extension.dreambooth.dreambooth import get_db_models, performance_wizard, training_wizard, training_wizard_person
 
 # def dreambooth_row():
 #     # with gr.Row():
