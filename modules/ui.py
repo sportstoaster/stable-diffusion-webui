@@ -1309,10 +1309,10 @@ def create_ui(wrap_gradio_gpu_call):
                 inputs = [
                     db_prompt,
                     stl,
+                    ang,
                     env,
                     bg,
                     pos,
-                    ang,
                     itms
                 ],
                 outputs = [

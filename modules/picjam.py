@@ -84,9 +84,10 @@ def prompt_constructor(prompt, style, angle, background, bg_color, positiion, it
         pos_prompt = f"on {positiion}"
     if len(items) > 0:
         items_prompt = f" with {items}"
-
+    
+    prompt += pos_prompt + items_prompt
     prompt += style_prompt + bg_prompt
-    prompt += bg_prompt + pos_prompt + items_prompt
+    
     prompt = angle_prompt + " " + prompt
 
     return prompt, negative_prompt
