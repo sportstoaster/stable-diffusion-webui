@@ -720,9 +720,9 @@ def create_ui(wrap_gradio_gpu_call):
         
         # db_prompt = picjam.dreambooth_prompt(obj_name, obj_type)
         
-
         with gr.Row().style(equal_height=False):
             with gr.Column(variant='panel'):
+                db_prompt = gr.Textbox(visible=False)
                 stl = gr.Radio(["Studio", "Professional Lifestyle", "UGC Lifestyle"], label='Style')
                 # bg = gr.Radio(["White", "Colour"], label='Background')
                 bg = gr.Textbox(label = 'Background Color')
@@ -803,7 +803,7 @@ def create_ui(wrap_gradio_gpu_call):
                 show_progress=False,
             )
             
-            db_prompt = gr.Textbox(visible=False)
+
             obj_name.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[db_prompt])
             obj_type.change(fn=picjam.dreambooth_prompt, inputs=[obj_name, obj_type], outputs=[db_prompt])
 
