@@ -716,10 +716,11 @@ def create_ui(wrap_gradio_gpu_call):
                 with gr.Group():
                     obj_name = gr.Textbox(label = 'Product Name')
                     obj_type =  gr.Textbox(label = 'Product Type')
-                    # fls = gr.Files(file_count="multiple")
+                    fls = gr.Files(file_count="multiple")
         
         # db_prompt = picjam.dreambooth_prompt(obj_name, obj_type)
         
+
         with gr.Row().style(equal_height=False):
             with gr.Column(variant='panel'):
                 db_prompt = gr.Textbox(visible=False)
