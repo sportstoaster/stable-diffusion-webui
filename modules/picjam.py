@@ -66,8 +66,8 @@ def prompt_constructor(prompt, style, angle, background, bg_color, positiion, it
     
     style_prompt = ""
     if style == "Studio":
-        style_prompt=" in clean studio environment, neat, clean, plain background"
-        negative_prompt += "street, product photo, unit, office, high-fashion, DSLR"
+        style_prompt=" in clean studio environment, neat, clean"
+        negative_prompt += "DSLR"
         if len(bg_color) > 0:
             bg_prompt = f" with {bg_color} background"
         else:
