@@ -73,11 +73,11 @@ def prompt_constructor(prompt, style, angle, background, bg_color, positiion, it
         else:
             bg_prompt = ""
     elif style=="Professional Lifestyle":
-        style_prompt="professional, product photo, high-fashion, DSLR, 80mm lens, 100mm lens, high-quality"
+        style_prompt=", professional, product photo, high-fashion, DSLR, high-quality"
         
-        tags = "photographer, HD, model, fashion, flash photography, product photography, high-resolution, pose, modern, clarity, boutique, experienced, trained, high-quality, quality, sophisticated, refined, depth of field, blurred background, bokeh,  high-fashion, 4K, hyperrealistic, heavy detailed, vivid colour, diffuse lighting,"
-        tags = tags.split(", ")
-        style_prompt += ", ".join(random.choices(tags, k=5))
+        # tags = "photographer, HD, model, fashion, flash photography, product photography, high-resolution, pose, modern, clarity, boutique, experienced, trained, high-quality, quality, sophisticated, refined, depth of field, blurred background, bokeh,  high-fashion, 4K, hyperrealistic, heavy detailed, vivid colour, diffuse lighting,"
+        # tags = tags.split(", ")
+        # style_prompt += ", ".join(random.choices(tags, k=5))
 
         negative_prompt += "in clean white studio environment"
         if len(background) > 0:
@@ -85,10 +85,10 @@ def prompt_constructor(prompt, style, angle, background, bg_color, positiion, it
         else:
             bg_prompt = ""
     elif style=="UGC Lifestyle":
-        style_prompt="instagram, review, phone camera"
-        tags = "iPhone photo, iPhone Image, Samsung Camera, user generated, real, social photo, social media, social advertisement, social photo, social, instagram, tiktok, facebook, authentic, real, unboxing, brand, relatable, sharing, testimonial, product review"
-        tags = tags.split(", ")
-        style_prompt += ", ".join(random.choices(tags, k=8))
+        style_prompt=", instagram, review, phone camera"
+        # tags = "iPhone photo, iPhone Image, Samsung Camera, user generated, real, social photo, social media, social advertisement, social photo, social, instagram, tiktok, facebook, authentic, real, unboxing, brand, relatable, sharing, testimonial, product review"
+        # tags = tags.split(", ")
+        # style_prompt += ", ".join(random.choices(tags, k=8))
 
         negative_prompt += "in clean white studio environment, DSLR, camera, 85mm, 100mm"
         if len(background) > 0:
