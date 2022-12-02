@@ -41,7 +41,8 @@ import modules.textual_inversion.ui
 import modules.hypernetworks.ui
 from modules.generation_parameters_copypaste import image_from_url_text
 import modules.picjam as picjam
-import modules.dreambooth as dreambooth
+
+import modules.dreambooth_ui as dreambooth_ui
 
 # this is a fix for Windows users. Without it, javascript files will be served with text/html content-type and the browser will not show any UI
 mimetypes.init()
@@ -1186,7 +1187,7 @@ def create_ui(wrap_gradio_gpu_call):
     modules.scripts.scripts_current = modules.scripts.scripts_txt2img
     modules.scripts.scripts_txt2img.initialize_scripts(is_img2img=False)
 
-    db_interface = dreambooth.dreambooth_row()
+    db_interface = dreambooth_ui.dreambooth_row()
 
     with gr.Blocks(analytics_enabled=False) as txt2img_interface:
         gr.Markdown("PicJam")
