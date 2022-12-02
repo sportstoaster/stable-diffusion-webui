@@ -1176,7 +1176,7 @@ Requested path was: {f}
                 parameters_copypaste.bind_buttons(buttons, result_gallery, "txt2img" if tabname == "txt2img" else None)
                 return result_gallery, generation_info if tabname != "extras" else html_info_x, html_info
 
-def create_ui(wrap_gradio_gpu_call):
+def create_ui_(wrap_gradio_gpu_call):
     import modules.img2img
     import modules.txt2img
 
@@ -1703,7 +1703,7 @@ def create_ui(wrap_gradio_gpu_call):
     return demo
 
 
-def create_ui_(wrap_gradio_gpu_call):
+def create_ui(wrap_gradio_gpu_call):
     import modules.img2img
     import modules.txt2img
 
