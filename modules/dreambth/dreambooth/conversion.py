@@ -25,7 +25,7 @@ import torch
 
 import modules.sd_models
 from modules.dreambth.dreambooth.db_config import DreamboothConfig, from_file
-from modules.dreambth.dreambooth import get_db_models, printm, reload_system_models, \
+from modules.dreambth.dreambooth.dreambooth import get_db_models, printm, reload_system_models, \
     unload_system_models
 from modules import paths, shared
 
