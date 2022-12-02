@@ -24,8 +24,8 @@ import gradio as gr
 import torch
 
 import modules.sd_models
-from extensions.sd_dreambooth_extension.dreambooth.db_config import DreamboothConfig, from_file
-from extensions.sd_dreambooth_extension.dreambooth.dreambooth import get_db_models, printm, reload_system_models, \
+from modules.dreambth.dreambooth.db_config import DreamboothConfig, from_file
+from modules.dreambth.dreambooth import get_db_models, printm, reload_system_models, \
     unload_system_models
 from modules import paths, shared
 

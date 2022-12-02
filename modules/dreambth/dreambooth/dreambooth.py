@@ -16,8 +16,8 @@ from huggingface_hub import HfFolder, whoami
 from six import StringIO
 from transformers import CLIPTextModel
 
-from extensions.sd_dreambooth_extension.dreambooth import conversion
-from extensions.sd_dreambooth_extension.dreambooth.db_config import from_file, Concept
+from modules.dreambth.dreambooth import conversion
+from modules.dreambth.dreambooth.db_config import from_file, Concept
 from modules import paths, shared, devices, sd_models, generation_parameters_copypaste
 
 try:
