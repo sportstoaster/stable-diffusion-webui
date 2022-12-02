@@ -1,7 +1,7 @@
 import gradio as gr
 
-from dreambth.dreambooth import conversion, dreambooth
-from dreambth.dreambooth.dreambooth import get_db_models, performance_wizard,\
+from modules.dreambth.dreambooth import conversion, dreambooth
+from modules.dreambth.dreambooth.dreambooth import get_db_models, performance_wizard,\
     training_wizard, training_wizard_person
 from modules import script_callbacks, sd_models, shared
 from modules.ui import setup_progressbar, gr_show
