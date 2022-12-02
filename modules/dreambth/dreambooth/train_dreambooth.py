@@ -24,12 +24,12 @@ from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
-from extensions.sd_dreambooth_extension.dreambooth import xattention
-from extensions.sd_dreambooth_extension.dreambooth.SuperDataset import SuperDataset
-from extensions.sd_dreambooth_extension.dreambooth.db_config import DreamboothConfig
-from extensions.sd_dreambooth_extension.dreambooth.dreambooth import save_checkpoint, list_features, \
+from modules.dreambth.dreambooth import xattention
+from modules.dreambth.dreambooth.SuperDataset import SuperDataset
+from modules.dreambth.dreambooth.db_config import DreamboothConfig
+from modules.dreambth.dreambooth.dreambooth import save_checkpoint, list_features, \
     is_image, printm, cleanup, sanitize_name
-from extensions.sd_dreambooth_extension.dreambooth.finetune_utils import FilenameTextGetter, EMAModel, \
+from modules.dreambth.dreambooth.finetune_utils import FilenameTextGetter, EMAModel, \
     encode_hidden_state
 from modules import shared
 

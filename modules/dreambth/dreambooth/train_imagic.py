@@ -13,9 +13,9 @@ from torchvision import transforms
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
-from extensions.sd_dreambooth_extension.dreambooth.db_config import DreamboothConfig
-from extensions.sd_dreambooth_extension.dreambooth.dreambooth import list_features, is_image, printm
-from extensions.sd_dreambooth_extension.dreambooth.train_dreambooth import AverageMeter
+from modules.dreambth.dreambooth.db_config import DreamboothConfig
+from modules.dreambth.dreambooth.dreambooth import list_features, is_image, printm
+from modules.dreambth.dreambooth.train_dreambooth import AverageMeter
 from modules import shared
 
 logger = get_logger(__name__)

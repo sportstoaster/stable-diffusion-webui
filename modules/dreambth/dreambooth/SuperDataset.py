@@ -8,8 +8,8 @@ from torchvision import transforms
 from pathlib import Path
 
 from modules.dreambth.dreambooth.db_config import Concept
-from extensions.sd_dreambooth_extension.dreambooth.dreambooth import is_image, list_features
-from extensions.sd_dreambooth_extension.dreambooth.finetune_utils import FilenameTextGetter
+from modules.dreambth.dreambooth.dreambooth import is_image, list_features
+from modules.dreambth.dreambooth.finetune_utils import FilenameTextGetter
 from modules import images
 
 
