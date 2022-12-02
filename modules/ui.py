@@ -42,9 +42,14 @@ import modules.hypernetworks.ui
 from modules.generation_parameters_copypaste import image_from_url_text
 import modules.picjam as picjam
 
+from extensions.sd_dreambooth_extension.dreambooth import conversion, dreambooth
+from extensions.sd_dreambooth_extension.dreambooth.dreambooth import get_db_models, performance_wizard,\
+    training_wizard, training_wizard_person
+
 # this is a fix for Windows users. Without it, javascript files will be served with text/html content-type and the browser will not show any UI
 mimetypes.init()
 mimetypes.add_type('application/javascript', '.js')
+
 
 if not cmd_opts.share and not cmd_opts.listen:
     # fix gradio phoning home

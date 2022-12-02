@@ -13,12 +13,12 @@ def dreambooth_train_prepare():
     pass
 
 def dreambooth_row():
-    with gr.Row():
-        with gr.Column():
-            with gr.Group() as tr_inp:
-                obj_name = gr.Textbox(label = 'Product Name')
-                obj_type =  gr.Textbox(label = 'Product Type')
-                fls = gr.Files(file_count="multiple")
+    # with gr.Row():
+    #     with gr.Column():
+    #         with gr.Group() as tr_inp:
+    #             obj_name = gr.Textbox(label = 'Product Name')
+    #             obj_type =  gr.Textbox(label = 'Product Type')
+    #             fls = gr.Files(file_count="multiple")
 
     with gr.Column() as dreambooth_interface:
         with gr.Row(equal_height=True, visible=False):
